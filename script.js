@@ -13,11 +13,11 @@ function checkWinner(board, player, computer, winner) {
     } else {
       if (row.every((cell) => cell === "X")) {
         console.log("X wins!");
-        winner = player.playerMarker
+        winner = player.playerMarker;
         return winner;
       } else if (row.every((cell) => cell === "O")) {
         console.log("O wins!");
-        winner = computer.playerMarker
+        winner = computer.playerMarker;
         return winner;
       }
     }
@@ -27,11 +27,11 @@ function checkWinner(board, player, computer, winner) {
   for (let col = 0; col < board[0].length; col++) {
     if (board.every((row) => row[col] === "X")) {
       console.log("X wins!");
-      winner = player.playerMarker
+      winner = player.playerMarker;
       return winner;
     } else if (board.every((row) => row[col] === "O")) {
       console.log("O wins!");
-      winner = computer.playerMarker
+      winner = computer.playerMarker;
       return winner;
     }
   }
@@ -42,14 +42,14 @@ function checkWinner(board, player, computer, winner) {
     (board[0][2] === "X" && board[1][1] === "X" && board[2][0] === "X")
   ) {
     console.log("X wins!");
-    winner = player.playerMarker
+    winner = player.playerMarker;
     return winner;
   } else if (
     (board[0][0] === "O" && board[1][1] === "O" && board[2][2] === "O") ||
     (board[0][2] === "O" && board[1][1] === "O" && board[2][0] === "O")
   ) {
     console.log("O wins!");
-    winner = computer.playerMarker
+    winner = computer.playerMarker;
     return winner;
   }
 
@@ -61,7 +61,7 @@ function checkWinner(board, player, computer, winner) {
 
   // No winner or draw yet
   console.log("No winner or draw yet.");
-  return (winner = "")
+  return (winner = "");
 }
 
 function getPlayerSelection(event, board, player) {
@@ -79,9 +79,8 @@ function getPlayerSelection(event, board, player) {
 
   const clickedElementClass = event.target.classList[0];
   const [rowIndex, colIndex] = classToIndex[clickedElementClass];
-
-  event.target.textContent = player.playerMarker;
   board[rowIndex][colIndex] = player.playerMarker;
+  event.target.textContent = player.playerMarker;
 
   console.log("player");
   console.log(board[0]);
@@ -115,63 +114,60 @@ function getComputerSelection(board, computer) {
   console.log(board[2]);
 }
 
-function game() {
-  let winner = ""
-  const markers = ["X", "O"];
-  const playerMarker = prompt("Enter your marker{X or O):").toUpperCase();
-  const player = createPlayer("player", playerMarker);
-  let computerMarker;
+function initializeGame() {
+  let player;
+  document.addEventListener("click", makePlayer);
+  function makePlayer(event) {
+    const x = document.querySelector(".x");
+    const o = document.querySelector(".o");
 
-  if (markers.indexOf(player.playerMarker) == 0) {
-    computerMarker = markers[1];
-  } else {
-    computerMarker = markers[0];
+    if (event.target == x || event.target == o) {
+      const playerMarker = event.target.textContent;
+      player = createPlayer("player", playerMarker);
+    }
   }
-  const computer = createPlayer("computer", computerMarker);
-  console.log(computer.playerMarker);
 
-  const rows = [
-    [-1, -1, -1],
-    [-1, -1, -1],
-    [-1, -1, -1],
-  ];
+  const modal = document.querySelector("#modal");
+  const startGameBtn = document.querySelector(".startGame");
+  startGameBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+    game();
+  });
 
-  // document.addEventListener("click", (event) => {
-  //   if (event.target.textContent == "" && winner == "") {
-  //     getPlayerSelection(event, rows, player);
-  //     checkWinner(rows, player, computer, winner);
-  //     console.log(winner)
-  //     if (winner == "") {
-  //       getComputerSelection(rows, computer);
-  //       checkWinner(rows, player, computer, winner);
-  //       console.log(winner)
-  //     }
-  //   }
-  // });
+  function game() {
+    let winner = "";
+    const markers = ["X", "O"];
+    const computerMarker = markers.find(
+      (marker) => marker !== player.playerMarker
+    );
+    const computer = createPlayer("computer", computerMarker);
+    console.log(computer.playerMarker);
 
-  // if (winner != "") {
-  //   alert(winner + " wins!");
-  //   return;
-  // }
+    const rows = [
+      [-1, -1, -1],
+      [-1, -1, -1],
+      [-1, -1, -1],
+    ];
 
-  document.addEventListener("click", handleClick);
+    document.addEventListener("click", handleClick);
 
-  function handleClick(event) {
-    if (event.target.textContent == "" && winner === "") {
-      getPlayerSelection(event, rows, player);
-      winner = checkWinner(rows, player, computer);
-      console.log(winner);
-
-      if (winner === "") {
-        getComputerSelection(rows, computer);
+    function handleClick(event) {
+      if (event.target.textContent == "" && winner === "") {
+        getPlayerSelection(event, rows, player);
         winner = checkWinner(rows, player, computer);
-        console.log(winner);
 
-        if (winner !== "") {
+        if (winner === "") {
+          getComputerSelection(rows, computer);
+          winner = checkWinner(rows, player, computer);
+        } else if (winner === "draw") {
+          alert("Draw");
+        } else {
+          document.removeEventListener("click", handleClick);
           alert(winner + " wins!");
-          document.removeEventListener("click", handleClick); // Remove the click event listener after the game is over
         }
       }
     }
   }
 }
+
+initializeGame();

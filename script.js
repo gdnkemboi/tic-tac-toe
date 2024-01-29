@@ -1,8 +1,8 @@
 function createPlayer(name, marker) {
   const playerName = name;
-  const playerMarker = marker;
+  marker = marker;
 
-  return { playerName, playerMarker };
+  return { playerName, marker };
 }
 
 function checkWinner(board, player, computer, winner) {
@@ -13,11 +13,11 @@ function checkWinner(board, player, computer, winner) {
     } else {
       if (row.every((cell) => cell === "X")) {
         console.log("X wins!");
-        winner = player.playerMarker;
+        winner = player.marker;
         return winner;
       } else if (row.every((cell) => cell === "O")) {
         console.log("O wins!");
-        winner = computer.playerMarker;
+        winner = computer.marker;
         return winner;
       }
     }
@@ -27,11 +27,11 @@ function checkWinner(board, player, computer, winner) {
   for (let col = 0; col < board[0].length; col++) {
     if (board.every((row) => row[col] === "X")) {
       console.log("X wins!");
-      winner = player.playerMarker;
+      winner = player;
       return winner;
     } else if (board.every((row) => row[col] === "O")) {
       console.log("O wins!");
-      winner = computer.playerMarker;
+      winner = computer;
       return winner;
     }
   }
@@ -42,14 +42,14 @@ function checkWinner(board, player, computer, winner) {
     (board[0][2] === "X" && board[1][1] === "X" && board[2][0] === "X")
   ) {
     console.log("X wins!");
-    winner = player.playerMarker;
+    winner = player;
     return winner;
   } else if (
     (board[0][0] === "O" && board[1][1] === "O" && board[2][2] === "O") ||
     (board[0][2] === "O" && board[1][1] === "O" && board[2][0] === "O")
   ) {
     console.log("O wins!");
-    winner = computer.playerMarker;
+    winner = computer;
     return winner;
   }
 
@@ -79,8 +79,8 @@ function getPlayerSelection(event, board, player) {
 
   const clickedElementClass = event.target.classList[0];
   const [rowIndex, colIndex] = classToIndex[clickedElementClass];
-  board[rowIndex][colIndex] = player.playerMarker;
-  event.target.textContent = player.playerMarker;
+  board[rowIndex][colIndex] = player.marker;
+  event.target.textContent = player.marker;
 
   console.log("player");
   console.log(board[0]);
@@ -103,10 +103,10 @@ function getComputerSelection(board, computer) {
     var randomNumber2 = Math.floor(Math.random() * 3);
   } while (board[randomNumber][randomNumber2] != -1);
 
-  board[randomNumber][randomNumber2] = computer.playerMarker;
+  board[randomNumber][randomNumber2] = computer.marker;
   const cellClass = `.${getPositionClass(randomNumber, randomNumber2)}`;
   const cellElement = document.querySelector(cellClass);
-  cellElement.textContent = computer.playerMarker;
+  cellElement.textContent = computer.marker;
 
   console.log("computer");
   console.log(board[0]);
@@ -115,6 +115,7 @@ function getComputerSelection(board, computer) {
 }
 
 function initializeGame() {
+  let winner = "";
   let player;
   document.addEventListener("click", makePlayer);
   function makePlayer(event) {
@@ -122,26 +123,43 @@ function initializeGame() {
     const o = document.querySelector(".o");
 
     if (event.target == x || event.target == o) {
+    console.log(event.target.textContent)
       const playerMarker = event.target.textContent;
+      console.log(playerMarker)
       player = createPlayer("player", playerMarker);
+      console.log(player.marker)
     }
   }
 
-  const modal = document.querySelector("#modal");
+  const modal = document.querySelector(".modal");
   const startGameBtn = document.querySelector(".startGame");
   startGameBtn.addEventListener("click", () => {
     modal.style.display = "none";
     game();
   });
 
+  const winnerTag = document.querySelector(".winner");
+  const gameOverModal = document.querySelector(".gameOver");
+  const gameOverModalContent = document.querySelector(".modalContent");
+  const winsTag = document.querySelector(".wins");
+
+  function gameOver() {
+    if (winner == "draw") {
+      gameOverModalContent.removeChild(winsTag);
+      winnerTag.textContent = "Draw!";
+    } else {
+      console.log(winner.marker);
+      winnerTag.textContent = winner.marker;
+    }
+
+    gameOverModal.style.display = "flex";
+  }
+
   function game() {
-    let winner = "";
     const markers = ["X", "O"];
-    const computerMarker = markers.find(
-      (marker) => marker !== player.playerMarker
-    );
+    const computerMarker = markers.find((marker) => marker !== player.marker);
     const computer = createPlayer("computer", computerMarker);
-    console.log(computer.playerMarker);
+    console.log(computer.marker);
 
     const rows = [
       [-1, -1, -1],
@@ -163,7 +181,7 @@ function initializeGame() {
           alert("Draw");
         } else {
           document.removeEventListener("click", handleClick);
-          alert(winner + " wins!");
+          gameOver();
         }
       }
     }

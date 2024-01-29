@@ -71,7 +71,7 @@ body {
   border-right: 0;
 }
 
-#modal {
+.modal {
   display: flex;
   position: fixed; /* Stay in place */
   left: 0;
@@ -91,4 +91,8 @@ body {
   border: 1px solid #888;
   width: 80%;
   max-width: 600px;
+}
+
+.gameOver {
+  display: none;
 }

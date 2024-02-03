@@ -5,19 +5,32 @@ function createPlayer(name, marker) {
   return { playerName, marker };
 }
 
+// function returnWinner(marker, winner) {
+//   if (player.marker === marker) {
+//     winner = player.marker;
+//   } else {
+//     winner = computer.marker;
+//   }
+// }
+
 function checkWinner(board, player, computer, winner) {
+  function returnWinner(marker) {
+    if (player.marker === marker) {
+      return player.marker;
+    } else {
+      return computer.marker;
+    }
+  }
   // Check rows
   for (let row of board) {
     if (row.includes(-1)) {
       continue;
     } else {
       if (row.every((cell) => cell === "X")) {
-        console.log("X wins!");
-        winner = player.marker;
+        winner = returnWinner("X");
         return winner;
       } else if (row.every((cell) => cell === "O")) {
-        console.log("O wins!");
-        winner = computer.marker;
+        winner = returnWinner("O");
         return winner;
       }
     }
@@ -26,12 +39,10 @@ function checkWinner(board, player, computer, winner) {
   // Check columns
   for (let col = 0; col < board[0].length; col++) {
     if (board.every((row) => row[col] === "X")) {
-      console.log("X wins!");
-      winner = player;
+      winner = returnWinner("X");
       return winner;
     } else if (board.every((row) => row[col] === "O")) {
-      console.log("O wins!");
-      winner = computer;
+      winner = returnWinner("O");
       return winner;
     }
   }
@@ -41,26 +52,22 @@ function checkWinner(board, player, computer, winner) {
     (board[0][0] === "X" && board[1][1] === "X" && board[2][2] === "X") ||
     (board[0][2] === "X" && board[1][1] === "X" && board[2][0] === "X")
   ) {
-    console.log("X wins!");
-    winner = player;
+    winner = returnWinner("X");
     return winner;
   } else if (
     (board[0][0] === "O" && board[1][1] === "O" && board[2][2] === "O") ||
     (board[0][2] === "O" && board[1][1] === "O" && board[2][0] === "O")
   ) {
-    console.log("O wins!");
-    winner = computer;
+    winner = returnWinner("O");
     return winner;
   }
 
   // Check for a draw
   if (board.flat().every((cell) => cell === "X" || cell === "O")) {
-    console.log("It's a draw!");
     return (winner = "draw");
   }
 
   // No winner or draw yet
-  console.log("No winner or draw yet.");
   return (winner = "");
 }
 
@@ -123,43 +130,50 @@ function initializeGame() {
     const o = document.querySelector(".o");
 
     if (event.target == x || event.target == o) {
-    console.log(event.target.textContent)
       const playerMarker = event.target.textContent;
-      console.log(playerMarker)
       player = createPlayer("player", playerMarker);
-      console.log(player.marker)
     }
   }
 
   const modal = document.querySelector(".modal");
   const startGameBtn = document.querySelector(".startGame");
   startGameBtn.addEventListener("click", () => {
-    modal.style.display = "none";
-    game();
+    if (player.marker !== "") {
+      modal.style.display = "none";
+      game();
+    }
   });
 
   const winnerTag = document.querySelector(".winner");
   const gameOverModal = document.querySelector(".gameOver");
-  const gameOverModalContent = document.querySelector(".modalContent");
+  const gameOverModalContent = document.querySelector(
+    ".gameOver > .modalContent"
+  );
   const winsTag = document.querySelector(".wins");
+  const playAgainBtn = document.querySelector(".playAgain");
+  const restartBtn = document.querySelector(".restart");
 
   function gameOver() {
     if (winner == "draw") {
       gameOverModalContent.removeChild(winsTag);
       winnerTag.textContent = "Draw!";
-    } else {
-      console.log(winner.marker);
-      winnerTag.textContent = winner.marker;
+    } else if (winner !== "") {
+      winnerTag.textContent = winner;
     }
 
     gameOverModal.style.display = "flex";
   }
 
+  document.addEventListener("click", (event) => {
+    if (event.target == restartBtn || event.target == playAgainBtn) {
+      location.reload();
+    }
+  });
+
   function game() {
     const markers = ["X", "O"];
     const computerMarker = markers.find((marker) => marker !== player.marker);
     const computer = createPlayer("computer", computerMarker);
-    console.log(computer.marker);
 
     const rows = [
       [-1, -1, -1],
@@ -173,14 +187,18 @@ function initializeGame() {
       if (event.target.textContent == "" && winner === "") {
         getPlayerSelection(event, rows, player);
         winner = checkWinner(rows, player, computer);
-
+        if (winner !== "") {
+          document.removeEventListener("click", handleClick);
+          gameOver();
+        }
         if (winner === "") {
           getComputerSelection(rows, computer);
           winner = checkWinner(rows, player, computer);
+          if (winner !== "") {
+            document.removeEventListener("click", handleClick);
+            gameOver();
+          }
         } else if (winner === "draw") {
-          alert("Draw");
-        } else {
-          document.removeEventListener("click", handleClick);
           gameOver();
         }
       }
